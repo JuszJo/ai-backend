@@ -1,0 +1,23 @@
+.vscode
+
+node_modules
+.env
+dist
+# Sentry Config File
+.sentryclirc
+
+image1.png
+
+.DS_store
+
+Edesiri - CV.pdf
+
+otp-v2.service.ts
+sms.service.ts
+
+.env*
+
+scripts
+scripts/*
+
+quaga-mobile-firebase-adminsdk-fbsvc-40c907e61d.json
