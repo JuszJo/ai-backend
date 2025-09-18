@@ -8,4 +8,4 @@ const multerStorage = {
 
 const upload = multer(multerStorage)
 
-export default upload;
+export const MULTER_CONFIG = { upload };

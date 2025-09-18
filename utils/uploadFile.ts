@@ -34,13 +34,13 @@
 //   );
 // }
 
-// export function normalizeFileName(fileName: string): string {
-//   return fileName
-//     .trim()
-//     .toLowerCase()
-//     .replace(/\s+/g, "_")          // replace spaces with _
-//     .replace(/[^\w.-]/g, "");      // remove non-alphanumeric except _ . -
-// }
+export function normalizeFileName(fileName: string): string {
+  return fileName
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")          // replace spaces with _
+    .replace(/[^\w.-]/g, "");      // remove non-alphanumeric except _ . -
+}
 
 
 // export async function uploadFile(file: Buffer, fileName: string, folderPath: string, bucketName: string) {
