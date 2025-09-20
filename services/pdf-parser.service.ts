@@ -6,6 +6,25 @@ import { pipeline } from "@huggingface/transformers";
 import { normalizeFileName } from "../utils/uploadFile.js";
 import { HF_TOKEN } from "../config/huggingface.config.js";
 
+/* fetch("https://openrouter.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <OPENROUTER_API_KEY>",
+    "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
+    "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    "model": "deepseek/deepseek-chat-v3.1:free",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the meaning of life?"
+      }
+    ]
+  })
+}); */
+
 // Load MiniLM locally (auto-downloads the first time)
 const extractor = await pipeline(
   "feature-extraction",
@@ -63,12 +82,6 @@ function generatePrompt(systemPrompt: string, text: string) {
 
 type SummaryType = "general" | "executive" | "academic" | "technical";
 
-// interface DocumentMetadata {
-//   filename: string;
-//   pages: number;
-//   timestamp: string;
-// }
-
 interface ProcessedPDF {
   docId: string;
   text: string;
@@ -80,11 +93,13 @@ interface SummarizeResult {
   metadata: any;
 }
 
-export class PDFSummarizer {
+class PDFSummarizer {
   llmEndpoint: string;
+  model: string;
 
-  constructor(llmEndpoint = "http://127.0.0.1:8080") {
+  constructor(llmEndpoint = "http://127.0.0.1:8080", model = "google/gemma-2-2b-it") {
     this.llmEndpoint = llmEndpoint;
+    this.model = model;
   }
 
   async processPDF(buffer: Buffer, filename: string): Promise<ProcessedPDF> {
@@ -95,14 +110,12 @@ export class PDFSummarizer {
       throw new Error("No text found in PDF");
     }
 
-    // Store full document in ChromaDB
     const normalizedName = normalizeFileName(filename)
     const docId = `${normalizedName}_${Date.now()}`;
 
-    // Generate embeddings
     const embedding = await extractor(text, {
-      pooling: "mean",   // average across tokens
-      normalize: true    // normalize to unit length
+      pooling: "mean",
+      normalize: true
     });
 
     await PINECONE_CONFIG.index.upsert([
@@ -139,7 +152,7 @@ export class PDFSummarizer {
     const prompt = generatePrompt(systemPrompt, text)
 
     const reqBody = {
-      model: "google/gemma-2-2b-it",
+      model: this.model,
       messages: [
         {
           role: "system",
