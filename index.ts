@@ -8,7 +8,6 @@ import { db } from "./config/db.config.js";
 import mongoose from "mongoose";
 import { Server } from "http";
 import { pinoLogger } from "./config/pino.config.js";
-// import agenda from "./jobs/jobs.js";
 
 const app = express();
 
@@ -20,10 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(pinoLogger);
 
 useRoutes(app);
-
-/* app.get("/debug-sentry", function mainHandler(req, res) {
-    throw new Error("My first Sentry error!");
-}); */
 
 if (process.env.NODE_ENV == "production") {
   // Sentry.setupExpressErrorHandler(app);
@@ -51,7 +46,7 @@ async function main() {
 
       console.error('Mongoose connection error:', err);
 
-      process.exit(1); // Optional: crash to let PM2 or Docker restart the app
+      process.exit(1);
     });
 
 
@@ -61,19 +56,11 @@ async function main() {
       console.log(`Listening on http://localhost:${PORT}`);
     });
 
-    // await agenda.start();
-    console.log("Agenda is ready");
-
-
     async function gracefulShutdown(server: Server) {
       console.log('Received shutdown signal. Shutting down gracefully...');
 
-      // Close the Express server
       server.close(async () => {
         console.log('Express server closed.');
-
-        // await agenda.stop();
-        console.log("Agenda stopped.");
 
         await mongoose.connection.close();
         console.log('MongoDB connection closed.');
@@ -82,7 +69,6 @@ async function main() {
       });
     };
 
-    // Listen for SIGTERM and SIGINT signals
     process.on('SIGTERM', () => gracefulShutdown(server));
     process.on('SIGINT', () => gracefulShutdown(server));
   }
@@ -92,6 +78,5 @@ async function main() {
 }
 
 main();
-
 
 export { app };

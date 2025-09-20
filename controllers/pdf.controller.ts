@@ -18,7 +18,6 @@ export const PDFController = {
       const data = await PDFService.summarizer.summarizePDF(processedPDF.docId, "general")
 
       res.status(200).json({ message: "success", data: data })
-
     }
     catch (error) {
       handleError(res, error)
