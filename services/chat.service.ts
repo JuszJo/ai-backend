@@ -2,6 +2,29 @@ import { ChatCompletion } from "openai/resources.js";
 import { OR_API_KEY } from "../config/openrouter.config.js";
 import { SystemPrompt } from "../sys/system.prompt.js";
 
+async function handleLLMResponse(response: Response, stream: boolean): Promise<ChatCompletion | AsyncGenerator<string>> {
+  if (!stream) {
+    return (await response.json()) as ChatCompletion;
+  }
+
+  if (!response.body) {
+    throw new Error("No response body");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  async function* streamGenerator() {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      yield decoder.decode(value, { stream: true });
+    }
+  }
+
+  return streamGenerator();
+}
+
 class ChatAI {
   llmEndpoint: string;
   model: string;
@@ -11,7 +34,7 @@ class ChatAI {
     this.model = model;
   }
 
-  async chat() {
+  async chat(input?: string, stream = false) {
     const body = {
       model: this.model,
       messages: [
@@ -21,7 +44,7 @@ class ChatAI {
         },
         {
           role: "user",
-          content: "What is the meaning of life, is it livable?"
+          content: input || "What is the meaning of life, is it livable?"
         }
       ]
     }
@@ -39,11 +62,13 @@ class ChatAI {
       throw new Error(`Response error ${response.status}, ${response.statusText}`)
     }
 
-    const data = await response.json() as ChatCompletion;
+    return handleLLMResponse(response, stream);
 
-    console.log(data.choices[0].message);
+    // const data = await response.json() as ChatCompletion;
 
-    return data;
+    // console.log(data.choices[0].message);
+
+    // return data;
   }
 }
 
