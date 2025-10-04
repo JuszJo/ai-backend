@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Plus } from 'lucide-react';
+import ChatInput from './components/ChatInput';
 
 interface Message {
   id: string;
@@ -14,13 +15,13 @@ function App() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const scrollToBottom = () => {
+  /* const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages]); */
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -29,8 +30,13 @@ function App() {
     }
   }, [input]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -43,7 +49,7 @@ function App() {
     setInput('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    /* setTimeout(() => {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -51,12 +57,13 @@ function App() {
       };
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
-    }, 1000);
+    }, 1000); */
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+
       handleSubmit(e);
     }
   };
@@ -87,19 +94,17 @@ function App() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`py-8 ${
-                    message.role === 'assistant' ? 'bg-[#2f2f2f]' : ''
-                  }`}
+                  className={`py-8 ${message.role === 'assistant' ? 'bg-[#2f2f2f]' : ''
+                    }`}
                 >
                   <div className="max-w-3xl mx-auto px-4">
                     <div className="flex gap-6">
                       <div className="flex-shrink-0">
                         <div
-                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-sm font-semibold ${
-                            message.role === 'user'
-                              ? 'bg-[#19c37d] text-white'
-                              : 'bg-[#19c37d] text-white'
-                          }`}
+                          className={`w-8 h-8 rounded-sm flex items-center justify-center text-sm font-semibold ${message.role === 'user'
+                            ? 'bg-[#19c37d] text-white'
+                            : 'bg-[#19c37d] text-white'
+                            }`}
                         >
                           {message.role === 'user' ? 'U' : 'AI'}
                         </div>
@@ -142,33 +147,20 @@ function App() {
 
         {/* Input Area */}
         <div className="border-t border-white/10 p-4">
-          <div className="max-w-3xl mx-auto">
-            <form onSubmit={handleSubmit} className="relative">
-              <div className="relative flex items-end bg-[#2f2f2f] rounded-3xl border border-white/10 focus-within:border-white/20 transition-colors">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Message ChatGPT"
-                  rows={1}
-                  disabled={isLoading}
-                  className="flex-1 bg-transparent px-6 py-4 text-[15px] resize-none focus:outline-none placeholder:text-white/40 max-h-[200px] overflow-y-auto"
-                  style={{ scrollbarWidth: 'thin', scrollbarColor: '#4a4a4a #2f2f2f' }}
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || isLoading}
-                  className="m-2 p-2 rounded-full bg-white text-black disabled:bg-white/20 disabled:text-white/40 hover:bg-white/90 transition-all disabled:cursor-not-allowed flex-shrink-0"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </div>
-            </form>
-            <p className="text-xs text-center text-white/40 mt-3">
-              ChatGPT can make mistakes. Check important info.
-            </p>
+          <div className='max-w-[800px] mx-auto'>
+            <ChatInput
+              disabled={false}
+              handleSubmit={handleSubmit}
+              input={input}
+              isLoading={false}
+              onChange={handleTextChange}
+              onKeyDown={handleKeyDown}
+              textareaRef={textareaRef}
+            />
           </div>
+          <p className="text-xs text-center text-white/40 mt-3">
+            AI can make mistakes. Check important info.
+          </p>
         </div>
       </div>
     </div>
