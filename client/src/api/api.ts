@@ -4,6 +4,8 @@ const env = process.env.NODE_ENV;
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+// "https://ai-chat-f9db.onrender.com"
+
 const prodServer = "http://localhost:3000";
 const devServer = "http://localhost:3000";
 
