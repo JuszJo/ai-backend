@@ -59,7 +59,9 @@ class ChatAI {
     });
 
     if (!response.ok) {
-      throw new Error(`Response error ${response.status}, ${response.statusText}`)
+      console.log(`context: LLM: ${this.llmEndpoint + "/api/v1/chat/completions"}, Model: ${this.model}`);
+      
+      throw new Error(`Error getting response from model. Status: ${response.status}, ${response.statusText}`)
     }
 
     return handleLLMResponse(response, stream);
